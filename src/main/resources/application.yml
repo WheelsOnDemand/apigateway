@@ -1,0 +1,27 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: apigateway
+
+  cloud:
+    config:
+      profile: prod
+    kubernetes:
+      discovery:
+        enabled: true
+        all-namespaces: true
+    discovery:
+      client:
+        health-indicator:
+          enabled: false
+
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:9296}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri:
