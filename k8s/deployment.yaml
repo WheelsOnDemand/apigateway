@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-gateway-app
+spec:
+  selector:
+    matchLabels:
+      app: cloud-gateway-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloud-gateway-app
+    spec:
+      containers:
+      - name: cloud-gateway-app
+        image: IMAGE_URL/cloudgateway
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9090
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+               name: config-cm
+               key: CONFIG_URL
+        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI
+          valueFrom: 
+            configMapKeyRef:
+              name: gateway-cm
+              key: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom: 
+            configMapKeyRef:
+              name: common-cm
+              key: SPRING_PROFILES_ACTIVE
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-gateway-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: cloud-gateway-app
+  ports:
+  - port: 80
+    targetPort: 9090
